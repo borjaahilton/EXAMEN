@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sabores de Huaraz - Panel Administrativo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- TOAST NOTIFICATIONS -->
+  <div id="toast-container"></div>
+
+  <!-- MODAL: LOGIN -->
+  <div id="login-modal" class="modal-overlay active">
+    <div class="modal-card">
+      <div class="login-header">
+        <img src="logo.jpg" alt="Sabores de Huaraz" style="width: 105px; height: 105px; border-radius: 50%; object-fit: cover; margin: 0 auto 12px; display: block; box-shadow: 0 6px 20px rgba(234, 88, 12, 0.35);">
+        <h2>Panel Administrativo</h2>
+        <p>Inicie sesión con credenciales de administrador para gestionar la carta y comandas de pedidos.</p>
+      </div>
+
+      <form id="login-form">
+        <div class="form-group">
+          <label for="login-email">Correo Electrónico</label>
+          <input type="email" id="login-email" value="admin@sabores.com" required placeholder="admin@sabores.com">
+        </div>
+
+        <div class="form-group">
+          <label for="login-password">Contraseña</label>
+          <input type="password" id="login-password" value="1234" required placeholder="••••••••">
+        </div>
+
+        <button type="submit" id="btn-login-submit" class="btn btn-primary btn-block">
+          Ingresar al Panel
+        </button>
+      </form>
+      <div class="demo-hints">
+        <small><strong>Credenciales Django:</strong> admin@sabores.com | 1234</small>
+      </div>
+    </div>
+  </div>
+
+  <!-- APP CONTAINER -->
+  <div id="app-container" class="dashboard-layout hidden">
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <img src="logo.jpg" alt="Logo" style="width: 42px; height: 42px; border-radius: 50%; object-fit: cover; box-shadow: 0 2px 8px rgba(0,0,0,0.2);">
+        <div>
+          <h3>Sabores de Huaraz</h3>
+          <span class="role-badge">ADMIN PANEL</span>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <button class="nav-item active" data-tab="tab-dashboard">
+          <span class="nav-icon">📊</span> Resumen General
+        </button>
+        <button class="nav-item" data-tab="tab-orders">
+          <span class="nav-icon">🛎️</span> Comandas y Pedidos <span id="pending-badge" class="badge-count">0</span>
+        </button>
+        <button class="nav-item" data-tab="tab-products">
+          <span class="nav-icon">📜</span> Gestión de la Carta
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-info">
+          <div class="avatar" id="user-avatar">A</div>
+          <div>
+            <strong id="user-display-name">Administrador</strong>
+            <small id="user-display-email">admin@...</small>
+          </div>
+        </div>
+        <button id="btn-logout" class="btn btn-logout" title="Cerrar sesión">
+          🚪 Salir
+        </button>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+      <!-- TOPBAR -->
+      <header class="topbar">
+        <div>
+          <h1 id="page-title">Resumen Operativo</h1>
+          <p class="subtitle">Monitoreo en vivo del restaurante "Sabores de Huaraz"</p>
+        </div>
+        <div class="topbar-actions">
+          <span class="api-status"><span class="status-dot"></span> API Conectada</span>
+          <button id="btn-refresh" class="btn btn-secondary">🔄 Actualizar Datos</button>
+        </div>
+      </header>
+
+      <!-- TAB 1: DASHBOARD -->
+      <section id="tab-dashboard" class="tab-pane active">
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon icon-amber">⏳</div>
+            <div>
+              <p>Pedidos Pendientes</p>
+              <h2 id="kpi-pending">0</h2>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon icon-blue">🍳</div>
+            <div>
+              <p>En Preparación</p>
+              <h2 id="kpi-cooking">0</h2>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon icon-green">💰</div>
+            <div>
+              <p>Ventas Totales</p>
+              <h2 id="kpi-total-sales">S/. 0.00</h2>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon icon-purple">🍽️</div>
+            <div>
+              <p>Platos en Carta</p>
+              <h2 id="kpi-total-dishes">0</h2>
+            </div>
+          </div>
+        </div>
+
+        <div class="dashboard-sections">
+          <div class="panel-card">
+            <div class="panel-header">
+              <h3>Últimos Pedidos Recibidos</h3>
+              <button class="btn btn-sm btn-link" onclick="switchTab('tab-orders')">Ver todos</button>
+            </div>
+            <div class="table-responsive">
+              <table class="data-table" id="recent-orders-table">
+                <thead>
+                  <tr>
+                    <th># Pedido</th>
+                    <th>Cliente</th>
+                    <th>Entrega</th>
+                    <th>Total</th>
+                    <th>Estado</th>
+                    <th>Acción</th>
+                  </tr>
+                </thead>
+                <tbody id="recent-orders-body">
+                  <tr><td colspan="6" class="text-center py-4">Cargando pedidos...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 2: PEDIDOS / COMANDAS -->
+      <section id="tab-orders" class="tab-pane">
+        <div class="panel-card">
+          <div class="panel-header">
+            <div>
+              <h3>Gestión de Comandas</h3>
+              <p class="text-muted">Cambie el estado del pedido para que el cliente lo visualice en su aplicación móvil.</p>
+            </div>
+            <div class="filter-group">
+              <label for="filter-order-status">Filtrar por estado:</label>
+              <select id="filter-order-status" class="form-select">
+                <option value="todos">Todos los pedidos</option>
+                <option value="pendiente">Pendientes</option>
+                <option value="en preparacion">En preparación</option>
+                <option value="listo">Listos para entrega</option>
+                <option value="entregado">Entregados</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>N° Pedido</th>
+                  <th>Cliente</th>
+                  <th>Fecha y Hora</th>
+                  <th>Detalle de Productos</th>
+                  <th>Modalidad</th>
+                  <th>Total</th>
+                  <th>Estado del Pedido</th>
+                </tr>
+              </thead>
+              <tbody id="orders-full-body">
+                <tr><td colspan="7" class="text-center py-4">Cargando comandas...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 3: GESTIÓN DE PRODUCTOS / CARTA -->
+      <section id="tab-products" class="tab-pane">
+        <div class="panel-card">
+          <div class="panel-header">
+            <div>
+              <h3>Carta del Restaurante</h3>
+              <p class="text-muted">Agregue platos nuevos, actualice precios o alterne la disponibilidad cuando un plato se agote.</p>
+            </div>
+            <button id="btn-open-create-product" class="btn btn-primary">
+              ➕ Nuevo Plato
+            </button>
+          </div>
+
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Foto</th>
+                  <th>Nombre del Plato</th>
+                  <th>Descripción</th>
+                  <th>Precio (S/.)</th>
+                  <th>Disponibilidad</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="products-table-body">
+                <tr><td colspan="6" class="text-center py-4">Cargando platos...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- MODAL: CREAR PRODUCTO -->
+  <div id="modal-product" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="modal-product-title">Registrar Nuevo Plato</h3>
+        <button class="btn-close" onclick="closeProductModal()">✕</button>
+      </div>
+
+      <form id="form-product">
+        <input type="hidden" id="prod-id">
+        <div class="form-group">
+          <label for="prod-name">Nombre del Plato *</label>
+          <input type="text" id="prod-name" required placeholder="Ej. Pachamanca Andina">
+        </div>
+
+        <div class="form-group">
+          <label for="prod-desc">Descripción</label>
+          <textarea id="prod-desc" rows="3" placeholder="Ingredientes típicos, preparación..."></textarea>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group col">
+            <label for="prod-price">Precio (S/.) *</label>
+            <input type="number" id="prod-price" step="0.50" min="1" required placeholder="35.00">
+          </div>
+          <div class="form-group col">
+            <label for="prod-available">Disponibilidad</label>
+            <select id="prod-available" class="form-select">
+              <option value="true">Disponible (En Carta)</option>
+              <option value="false">Agotado</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="prod-image">URL de Imagen</label>
+          <input type="url" id="prod-image" placeholder="https://ejemplo.com/foto.jpg">
+          <small class="text-muted">Si lo deja vacío se asignará una foto representativa.</small>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" onclick="closeProductModal()">Cancelar</button>
+          <button type="submit" id="btn-save-product" class="btn btn-primary">Guardar Plato</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
